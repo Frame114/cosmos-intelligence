@@ -1,4 +1,15 @@
-# Architecture Overview
+# Architecture Overview (legacy summary)
+
+| Field | Value |
+|---|---|
+| Version | 1.0 |
+| Last updated | 2026-11-13 |
+| Status | Legacy orientation note |
+| Purpose | Preserve a concise overview for existing repository links. |
+| Scope | Intended architecture orientation; see the current architecture specification for full details. |
+| Assumptions | This is a design baseline; verify repository state and mutable upstream contracts before implementation. |
+
+The current source of truth is [the system architecture specification](../01-architecture/SYSTEM_ARCHITECTURE.md). This page is retained as a short orientation note for existing links.
 
 ## Intended system boundaries
 
@@ -34,6 +45,6 @@ Validation and normalisation (Pydantic/domain models)
 - AI components consume validated records and must not invent scientific measurements.
 - MCP tools should call the same application services as the REST API rather than duplicate business logic.
 
-## Incremental delivery
+## Delivery status
 
-The first working slice is deliberately narrow: inspect and integrate the current APOD endpoint, test it independently, and expose it through a small service. Other integrations follow only after the shared patterns are understood and tested.
+The diagrams above describe the intended system; they do not represent a deployed application. The current repository contains an early FastAPI foundation and APOD prototype. Review [project status](../../PROJECT_STATUS.md) and the [implementation plan](../10-implementation/IMPLEMENTATION_PLAN.md) for the remaining work and acceptance gates.

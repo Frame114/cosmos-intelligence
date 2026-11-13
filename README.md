@@ -1,119 +1,69 @@
 # Cosmos Intelligence
 
-**An open-source scientific data platform for exploring NASA datasets, space-weather events, near-Earth objects and Earth-observation media.**
+Cosmos Intelligence is a planned open-source platform for exploring NASA astronomy, near-Earth object, space-weather, Earth-event, and media data. The project combines a Python API, a web dashboard, a provenance-aware data layer, and optional evidence-grounded AI and Model Context Protocol (MCP) access.
 
-Cosmos Intelligence is a portfolio-grade AI engineering project built to demonstrate reliable API integration, data engineering, backend architecture, scientific data interpretation, MCP tool development and production deployment.
+**Current state:** architecture and documentation baseline. The repository also contains an early FastAPI foundation and APOD prototype. A complete Docker-first full-stack application has not yet been implemented or verified. See [project status](PROJECT_STATUS.md) for the evidence-based breakdown.
 
-> **Project status:** Early development — the repository currently contains the project foundation. Features are added only when implemented and tested.
+## Start here
 
-## Project goals
+- [Documentation index](docs/README.md)
+- [Product requirements](docs/00-project/PRD.md)
+- [System architecture](docs/01-architecture/SYSTEM_ARCHITECTURE.md)
+- [NASA integration research](docs/03-integrations/NASA_INTEGRATIONS.md)
+- [Implementation plan](docs/10-implementation/IMPLEMENTATION_PLAN.md)
+- [Roadmap](ROADMAP.md)
 
-- Integrate official NASA data services through well-tested, resilient API clients.
-- Validate and normalise external data before it enters the application.
-- Store useful records for search, comparison and historical analysis.
-- Present scientific information through a clear web dashboard.
-- Add an evidence-grounded AI research assistant.
-- Expose selected capabilities through a Model Context Protocol (MCP) server.
-- Demonstrate professional engineering practices: tests, security, CI, documentation and reproducible deployment.
+## Product direction
 
-## Planned capabilities
+The planned application will:
 
-| Area | Planned capability |
+- Integrate selected NASA data services with explicit validation, source provenance, and attribution.
+- Support searching, comparing, and visualizing astronomy, near-Earth objects, space weather, natural events, and NASA media.
+- Present media links with item-level rights metadata; the application will not mirror NASA media binaries by default.
+- Add an optional research assistant whose answers reference validated source records and disclose uncertainty.
+- Expose selected application capabilities through typed MCP tools and resources.
+- Run reproducibly in Docker Compose for local development and deploy behind HTTPS on an Ubuntu VPS.
+
+These are planned capabilities, not a claim that the features already exist. See [product scope](docs/00-project/PRODUCT_SCOPE.md) for explicit inclusions and exclusions.
+
+## Target architecture
+
+| Area | Documented direction |
 |---|---|
-| Astronomy picture | Retrieve and explore NASA's Astronomy Picture of the Day |
-| Near-Earth objects | Search and compare asteroid approach data |
-| Space weather | Explore relevant DONKI event records |
-| Earth events | Discover curated natural-event data through EONET |
-| NASA media | Search the NASA Image and Video Library |
-| Data platform | Normalisation, persistence, provenance and resilient ingestion |
-| AI assistant | Generate source-grounded explanations and reports |
-| MCP | Expose selected searches and analysis as typed tools |
+| Backend | Python, FastAPI, Pydantic, HTTPX, SQLAlchemy, Alembic |
+| Database | PostgreSQL |
+| Frontend | React, TypeScript, Vite, Tailwind CSS |
+| Charts and maps | Recharts; map provider remains a deployment decision |
+| AI | Optional provider abstraction; public generation remains gated on policy review |
+| Interoperability | Official Python MCP SDK, with transport and authorization boundaries |
+| Operations | Docker Compose, GitHub Actions, Caddy for HTTPS |
 
-## Architecture direction
+The target and rationale are in [technology stack](docs/02-technical/TECH_STACK.md); [Docker architecture](docs/08-infrastructure/DOCKER_ARCHITECTURE.md) is a specification, not an available compose deployment yet.
 
-- **Backend:** Python, FastAPI, Pydantic, HTTPX, SQLAlchemy and Alembic
-- **Database:** PostgreSQL
-- **Frontend:** React, TypeScript, Vite and Tailwind CSS
-- **Charts:** Recharts
-- **AI integration:** OpenRouter (optional; provider abstraction planned)
-- **Agent interoperability:** MCP using the official Python SDK
-- **Operations:** Docker, Docker Compose, GitHub Actions and Caddy for production HTTPS
+## NASA integrations and research freshness
 
-The architecture will be delivered incrementally. The first working slice is a FastAPI health endpoint; the first NASA integration will follow after its live response contract has been inspected.
+The current research baseline selects APOD Basic, NeoWs, DONKI, EONET v3, and NASA's Image and Video Library. Endpoint behavior can change; each integration must be rechecked against its linked official documentation and a fresh response before implementation. NASA's published APOD migration retires the legacy APOD API on 2026-12-01; implementation should use the replacement service and verify the dedicated date-filter contract.
 
-## NASA API compatibility
+NASA-branded or NASA-derived content is not an endorsement. Asset-level copyright/credit may vary, and NASA's current AI/SI language needs formal review before the project enables generated responses based on NASA data. See [NASA attribution and provenance](docs/03-integrations/API_PROVENANCE.md) and the integration-specific policy gate.
 
-NASA API endpoints evolve. The project will verify current official documentation and live response contracts before implementing each integration. In particular, the legacy APOD API endpoint is being retired; the project will target NASA's replacement APOD endpoint rather than build on the retiring service.
+Official starting points: [NASA API portal](https://api.nasa.gov/), [APOD Basic](https://science.nasa.gov/wp-json/wp/v2/apod-basic), [NeoWs](https://api.nasa.gov/), [EONET v3](https://eonet.gsfc.nasa.gov/api/v3), [NASA Image and Video Library](https://images-api.nasa.gov/).
 
-Useful official resources:
+## Development
 
-- [NASA API portal](https://api.nasa.gov/)
-- [NASA Science APOD API](https://science.nasa.gov/wp-json/wp/v2/apod-basic)
-- [NASA Image and Video Library API](https://images-api.nasa.gov/)
+The current executable repository is an early Python backend prototype, not the full-stack target. For the existing environment and commands, consult [local development](docs/11-operations/LOCAL_DEVELOPMENT.md), then check that guide against the current repository before relying on any command. It describes intended setup steps and does not assert a successful build, test run, or Docker startup.
 
-## Quick start
+Do not place real NASA or LLM credentials in source control, logs, example fixtures, or URLs. The architecture provides secret-handling rules in [secrets management](docs/06-security/SECRETS_MANAGEMENT.md).
 
-Prerequisites: Python 3.11+, Git and an optional NASA API key.
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Frame114/cosmos-intelligence.git
-   cd cosmos-intelligence
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-   # Windows PowerShell
-   .venv\Scripts\Activate.ps1
-   # Linux/macOS
-   source .venv/bin/activate
-   ```
-3. Install development dependencies:
-   ```bash
-   python -m pip install --upgrade pip
-   pip install -e ".[dev]"
-   ```
-4. Copy `.env.example` to `.env` when local configuration is needed. Never commit real credentials.
-5. Run linting and tests:
-   ```bash
-   ruff check .
-   pytest --cov=app --cov-report=term-missing
-   ```
-6. Start the API:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-   Then open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) or check [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health).
-
-## Engineering principles
-
-1. Verify external contracts against official documentation and live responses.
-2. Treat all upstream API data as untrusted input.
-3. Keep secrets out of source control, logs and test fixtures.
-4. Use timeouts, bounded retries and explicit error handling for network calls.
-5. Preserve source attribution and distinguish observed facts from AI-generated interpretation.
-6. Test failure modes, not only successful responses.
-7. Never describe a feature as complete until its tests and acceptance criteria pass.
-
-## Project tracking
+## Project records
 
 - [Project status](PROJECT_STATUS.md)
-- [Roadmap](ROADMAP.md)
-- [Architecture notes](docs/architecture/overview.md)
-- [API research and integration notes](docs/integrations/nasa-api-notes.md)
-- [Architecture decisions](DECISIONS.md)
-- [Technical debt](TECHNICAL_DEBT.md)
-- [Assessment rubric](ASSESSMENT.md)
+- [Engineering roadmap](ROADMAP.md)
+- [Architecture decision log](DECISIONS.md)
+- [Technical debt register](TECHNICAL_DEBT.md)
+- [Engineering assessment](ASSESSMENT.md)
 - [Changelog](CHANGELOG.md)
+- [Definition of done](DEFINITION_OF_DONE.md)
 
-## Contributing
+## Licensing and disclaimer
 
-Issues and pull requests are welcome. Please include tests for behaviour changes and update documentation when interfaces or setup instructions change.
-
-## Data, attribution and licensing
-
-This repository's source code is licensed under the MIT License. NASA datasets and media remain subject to their respective source terms, attribution requirements and usage restrictions. NASA is not affiliated with or endorsing this project. Verify asset-specific rights before redistributing media.
-
-## Disclaimer
-
-Cosmos Intelligence is an educational and research software project. It is not an official NASA product and does not provide authoritative operational, safety or scientific advice.
+Repository source code is licensed under MIT (see [LICENSE](LICENSE)). NASA datasets and media remain subject to their own terms, attribution rules, and item-specific rights. Cosmos Intelligence is an independent educational and research project, not an official NASA product. Its content is not authoritative operational, safety, or scientific advice.

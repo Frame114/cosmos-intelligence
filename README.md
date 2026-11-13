@@ -39,7 +39,7 @@ Cosmos Intelligence is a portfolio-grade AI engineering project built to demonst
 - **Agent interoperability:** MCP using the official Python SDK
 - **Operations:** Docker, Docker Compose, GitHub Actions and Caddy for production HTTPS
 
-The architecture will be delivered incrementally. The first milestone validates one real NASA API integration before expanding the system.
+The architecture will be delivered incrementally. The first working slice is a FastAPI health endpoint; the first NASA integration will follow after its live response contract has been inspected.
 
 ## NASA API compatibility
 
@@ -53,7 +53,7 @@ Useful official resources:
 
 ## Quick start
 
-Prerequisites: Python 3.11+ (the project will pin and test a supported version), Git and an optional NASA API key.
+Prerequisites: Python 3.11+, Git and an optional NASA API key.
 
 1. Clone the repository:
    ```bash
@@ -73,13 +73,17 @@ Prerequisites: Python 3.11+ (the project will pin and test a supported version),
    python -m pip install --upgrade pip
    pip install -e ".[dev]"
    ```
-4. Copy `.env.example` to `.env` and add credentials only when a feature requires them.
-5. Run tests:
+4. Copy `.env.example` to `.env` when local configuration is needed. Never commit real credentials.
+5. Run linting and tests:
    ```bash
-   pytest
+   ruff check .
+   pytest --cov=app --cov-report=term-missing
    ```
-
-The initial foundation is intentionally small. Run instructions will be expanded as executable features land.
+6. Start the API:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+   Then open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) or check [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health).
 
 ## Engineering principles
 

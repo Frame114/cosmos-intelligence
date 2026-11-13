@@ -1,7 +1,7 @@
 # Project Status
 
 **Last updated:** 2026-11-13  
-**Overall status:** FOUNDATION CREATED — implementation not yet verified.
+**Overall status:** REPOSITORY FOUNDATION IMPLEMENTED — execution and CI results not yet verified.
 
 ## Current milestone
 
@@ -9,13 +9,18 @@
 
 | Item | Status | Evidence |
 |---|---|---|
-| Public GitHub repository | VERIFIED | Repository exists and is public |
+| Public GitHub repository | VERIFIED | Repository exists, is public, and is accessible |
 | Project overview and setup guide | IMPLEMENTED | README.md |
 | Python project configuration | IMPLEMENTED | pyproject.toml |
 | Environment template and secret exclusions | IMPLEMENTED | .env.example, .gitignore |
-| License | IMPLEMENTED | LICENSE |
-| API contract research | IN PROGRESS | docs/integrations/nasa-api-notes.md |
-| Automated test workflow | NOT STARTED | — |
+| MIT license | IMPLEMENTED | LICENSE |
+| Architecture and API research notes | IMPLEMENTED | docs/ |
+| FastAPI application entry point | IMPLEMENTED | app/main.py |
+| Health endpoint | IMPLEMENTED | GET /health |
+| Automated smoke tests | IMPLEMENTED | tests/test_health.py |
+| GitHub Actions CI workflow | IMPLEMENTED | .github/workflows/ci.yml |
+| Local test execution | NOT VERIFIED | Must run locally |
+| GitHub Actions result | NOT VERIFIED | Check Actions after workflow starts |
 | First live NASA APOD request | NOT STARTED | — |
 
 ## Status definitions
@@ -41,7 +46,9 @@ For each lesson, record:
 
 ## Next actions
 
-1. Confirm the repository baseline and local development environment.
-2. Review the current official APOD endpoint and inspect a real response.
-3. Implement a small HTTPX client with explicit timeout and error handling.
-4. Add mocked contract tests before adding more NASA services.
+1. Clone the repository and create a local Python virtual environment.
+2. Install the project with development dependencies.
+3. Run Ruff and pytest; record the actual output.
+4. Inspect the first GitHub Actions run and fix any failures.
+5. Review the current official APOD endpoint and inspect a real response.
+6. Implement the first HTTPX client only after the response contract is understood.

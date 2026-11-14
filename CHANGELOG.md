@@ -7,6 +7,11 @@
 - Re-ran the Python 3.12 suite against disposable PostgreSQL: 49 tests passed, Ruff and mypy passed, both migrations applied, and Alembic detected no schema drift. App coverage measured 66%.
 - Frontend typecheck, 4 Vitest tests, production build, Compose config, and local API/frontend/PostgreSQL health checks passed. Previous GitHub Actions baseline run failed on Ruff; the corrected release push will trigger a new run.
 
+## Release correction (2026-11-14)
+
+- Restored the generated initial Alembic migration after GitHub Actions caught that whitespace cleanup had collapsed its line breaks. The correction preserves the original migration structure and strips trailing whitespace safely.
+- Re-ran the Python 3.12 lint, mypy, disposable PostgreSQL migration/drift checks, and full 49-test suite successfully. The GitHub Actions run for the corrective commit remains the final remote release gate.
+
 ## Local test build update (2026-11-14)
 
 - Added a bounded DONKI fallback to NASA Open APIs when the migrated CCMC primary times out or returns a retryable server failure. The local runtime returned ten notifications for the 30-day window through the fallback; rate-limit failures do not trigger fallback.

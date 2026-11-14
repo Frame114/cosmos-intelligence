@@ -25,7 +25,7 @@ This tracker distinguishes implementation from testing and release. A feature is
 | Frontend | React/TypeScript dashboard shell and astronomy, asteroid, space-weather, Earth-event map/list, media detail, assistant gate, reports, saved-record workspace, and settings pages | Typecheck, four Vitest tests, and production build pass. Explorers use the implemented REST contracts. Assistant generation remains a clear gated state; reports can be listed/read/deleted but cannot be generated. |
 | Local containers | Python API/worker image, Node/Nginx frontend image, PostgreSQL 18, one-shot migration, Caddy proxy; isolated data/proxy networks and no host-published database/API/worker ports | Latest API/frontend images built and Compose services are healthy; migration task exited 0; liveness, readiness, auth-session, OpenAPI, and dashboard are reachable through Caddy. Worker runs with `WORKER_SCHEDULES_ENABLED=false`; no NASA request was made for runtime smoke checks. |
 | AI and MCP | Authenticated private Streamable HTTP MCP adapter with ten tools, two static resources, two resource templates, and three prompts; AI policy gate | MCP delegates through versioned REST, validates OIDC or local-only development identity, enforces per-subject read limits and scopes, and has no host-published port. Authenticated Caddy transport smoke passed. AI retrieval/provider validation and generation remain absent and policy-gated. |
-| CI | Python 3.12 and Node 22.22.2 workflow; lint, strict typecheck, disposable PostgreSQL migration/drift checks, backend tests, frontend checks/tests/build | Frontend job passed on `13d429c`; the Python job caught invalid syntax after generated-migration whitespace cleanup. The migration is restored and all Python checks pass locally; the corrective main push will trigger a fresh run. |
+| CI | Python 3.12 and Node 22.22.2 workflow; lint, strict typecheck, disposable PostgreSQL migration/drift checks, backend tests, frontend checks/tests/build | Both jobs passed on `main` commit `58a3a18`; migration, drift, lint, typing, tests, frontend typecheck, tests, and build all passed. GitHub emitted nonblocking action-runtime and Ubuntu runner migration notices. |
 
 ## Files changed in this implementation checkpoint
 
@@ -77,7 +77,7 @@ This tracker distinguishes implementation from testing and release. A feature is
 | `docker compose config --quiet` | Passed | Compose service/network configuration. |
 | `docker compose build` | Passed | API and frontend images. |
 | Compose runtime smoke | API/frontend/MCP/PostgreSQL healthy; migration exited 0; health, auth-session, OpenAPI, dashboard, authenticated MCP through Caddy, and the 30-day DONKI fallback request passed. MCP listed 10 tools and rejected an invalid asteroid ID. Worker schedules confirmed false. | Local only; the DONKI verification made one live NASA notification request using the runtime key. The key was not displayed or logged. |
-| GitHub Actions | Frontend job passed on `13d429c`; Python job failed Ruff because a migration file was collapsed during whitespace cleanup. Restored migration and all local checks now pass; corrective run pending. | The corrective push to `main` triggers the workflow. |
+| GitHub Actions | Passed on `58a3a18`: Python and frontend jobs green. | [Run 43630665464](https://github.com/Frame114/cosmos-intelligence/actions/runs/43630665464). GitHub reported nonblocking Node 20 action deprecation and runner-image migration notices. |
 
 An earlier full coverage attempt timed out while opening a connection to disposable PostgreSQL during the DONKI route test. Later full runs passed. The current 49-test Python 3.12 run is the latest coverage measurement; coverage is lower than earlier partial-suite percentages because it includes all current application modules.
 
@@ -89,6 +89,6 @@ An earlier full coverage attempt timed out while opening a connection to disposa
 4. Implement the bounded retrieval and provider adapter, citation/schema validation, evaluations, and spend controls only after the NASA AI/SI approval gate; generation must remain disabled until approval.
 5. Add MCP Inspector evidence and production OIDC configuration; the local SDK transport test through Caddy passes.
 6. Add a production Compose overlay with file-backed secrets, domain/TLS configuration, resource limits, persistent certificate state, image scanning, backups, and an approved deployment runbook.
-7. Resolve dependency lock/review policy and run the updated CI workflow in GitHub.
+7. Resolve the Python dependency lock/review policy. Update GitHub Actions to nondeprecated action runtimes before the announced runner transition.
 
-No migration has been run against production. No production deployment has been performed. The local app is available for testing at `http://localhost:8080`; browser PKCE sign-in, AI generation, production hardening, GitHub CI result, and deployment are not complete.
+No migration has been run against production. No production deployment has been performed. The local app is available for testing at `http://localhost:8080`; browser PKCE sign-in, AI generation, production hardening, and deployment are not complete.

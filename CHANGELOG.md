@@ -5,12 +5,12 @@
 - Added contributor setup and quality-check guidance; corrected the documentation index, local development guide, and Compose specification to reflect the running MCP service and implemented local workflows.
 - Corrected Ruff violations and a type-narrowing issue in the JPL orbit map route found during the release audit.
 - Re-ran the Python 3.12 suite against disposable PostgreSQL: 49 tests passed, Ruff and mypy passed, both migrations applied, and Alembic detected no schema drift. App coverage measured 66%.
-- Frontend typecheck, 4 Vitest tests, production build, Compose config, and local API/frontend/PostgreSQL health checks passed. Previous GitHub Actions baseline run failed on Ruff; the corrected release push will trigger a new run.
+- Frontend typecheck, 4 Vitest tests, production build, Compose config, and local API/frontend/PostgreSQL health checks passed. The initial GitHub run exposed a migration formatting error; the correction was verified in [green main CI run 43630665464](https://github.com/Frame114/cosmos-intelligence/actions/runs/43630665464).
 
 ## Release correction (2026-11-14)
 
 - Restored the generated initial Alembic migration after GitHub Actions caught that whitespace cleanup had collapsed its line breaks. The correction preserves the original migration structure and strips trailing whitespace safely.
-- Re-ran the Python 3.12 lint, mypy, disposable PostgreSQL migration/drift checks, and full 49-test suite successfully. The GitHub Actions run for the corrective commit remains the final remote release gate.
+- Re-ran the Python 3.12 lint, mypy, disposable PostgreSQL migration/drift checks, and full 49-test suite successfully. Both GitHub Actions jobs passed for the corrective commit.
 
 ## Local test build update (2026-11-14)
 

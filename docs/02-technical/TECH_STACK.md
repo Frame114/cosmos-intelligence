@@ -1,23 +1,23 @@
 # Technology Stack
 
-**Version:** 1.0  
-**Last updated / research date:** 2026-11-13  
-**Status:** Phase 1 specification baseline  
-**Scope:** Covers the proposed Technology Stack behavior and interfaces; current implementation status is tracked separately.  
-**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.  
+**Version:** 1.0<br>
+**Last updated / research date:** 2026-11-14<br>
+**Status:** Implementation baseline; local service slice uses this stack<br>
+**Scope:** Covers the proposed Technology Stack behavior and interfaces; current implementation status is tracked separately.<br>
+**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.<br>
 
-**Purpose:** Record the selected stack, compatibility approach, and official research links.  
+**Purpose:** Record the selected stack, compatibility approach, and official research links.<br>
 
 ## Selected stack
 
 | Area | Selection | Reason and implementation rule |
 |---|---|---|
-| Runtime | Python 3.12 | Security-supported through 2028-10 per Python Developer Guide; mature library compatibility. Set requires-python and CI matrix to 3.12 in implementation. Recheck a newer supported runtime quarterly. |
+| Runtime | Python 3.12 | Package metadata, CI, and backend image align on Python 3.12. Recheck a newer supported runtime quarterly. |
 | HTTP API | FastAPI + Pydantic v2 + pydantic-settings | Typed request/response validation, generated OpenAPI, dependency injection, settings from env/secrets. |
 | HTTP client | HTTPX AsyncClient | Shared async connection pool with explicit connect/read/write/pool timeout, bounded connections, and mocked contracts. |
-| Persistence | PostgreSQL 18 + SQLAlchemy 2 + Alembic + psycopg 3 | Relational constraints, JSONB provenance, transactional upsert, full-text search. Review the PostgreSQL supported major before image lock. |
+| Persistence | PostgreSQL 18 + SQLAlchemy 2 + Alembic + psycopg 3 | Relational constraints, JSONB provenance, transactional upsert, full-text search. Local Compose currently uses PostgreSQL 18.7. Review the supported patch before release. |
 | Background work | Separate Python worker + PostgreSQL job/lease table | Durable work without Redis; queue operations use short transactions and idempotent handlers. |
-| Frontend | React + TypeScript + Vite | Component UI and typed browser contracts; Vite current docs require Node 20.19+ or 22.12+. Use Node 22 LTS image initially and confirm active LTS when locking. |
+| Frontend | React + TypeScript + Vite | Component UI and typed browser contracts; local build and CI use Node 22.22.2. |
 | Styling | Tailwind CSS 4 | Utility styling; current v4 browser baseline is Safari 16.4+, Chrome 111+, Firefox 128+. Confirm user browser support before release. |
 | Charts/icons/maps | Recharts, Lucide React, Leaflet with React Leaflet | Declarative accessible chart wrappers, tree-shakable SVG icons, event geometry maps. Select and document a permitted tile provider and attribution before production. |
 | AI gateway | OpenRouter Chat Completions API through a provider protocol | Configurable model/provider routing; current capabilities are discovered/configured, never assumed permanent. |
@@ -27,9 +27,9 @@
 
 ## Dependency and version policy
 
-Use tested compatible ranges during active work, then produce and commit one lockfile per package manager. CI and release images install from the lockfile. Dependabot or equivalent proposes updates; review changelogs, run focused contract/security/AI evaluations, and roll updates in small batches. Never make the documentation version string a substitute for a lockfile.
+The frontend has an npm lockfile. Python dependencies currently use compatible ranges without a committed lock, so reproducible backend dependency locking remains open. CI and release images should install from reviewed lockfiles. Dependabot or equivalent should propose updates; review changelogs and run focused contract/security/AI evaluations in small batches.
 
-The repository presently advertises Python 3.11+, CI uses 3.11, and pyproject.toml has uncommitted work. This specification does not alter that file. Milestone 1 must reconcile the source metadata, container base image, and CI around Python 3.12.
+The project metadata, CI workflow, and Python container image now use Python 3.12. Local containers use exact Python/Node patch tags and a PostgreSQL patch tag; release images should also be pinned to reviewed digests.
 
 ## Research sources
 

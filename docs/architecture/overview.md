@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Version | 1.0 |
-| Last updated | 2026-11-13 |
-| Status | Legacy orientation note |
+| Last updated | 2026-11-14 |
+| Status | Concise architecture overview; delivery status refreshed |
 | Purpose | Preserve a concise overview for existing repository links. |
 | Scope | Intended architecture orientation; see the current architecture specification for full details. |
 | Assumptions | This is a design baseline; verify repository state and mutable upstream contracts before implementation. |
@@ -47,4 +47,4 @@ Validation and normalisation (Pydantic/domain models)
 
 ## Delivery status
 
-The diagrams above describe the intended system; they do not represent a deployed application. The current repository contains an early FastAPI foundation and APOD prototype. Review [project status](../../PROJECT_STATUS.md) and the [implementation plan](../10-implementation/IMPLEMENTATION_PLAN.md) for the remaining work and acceptance gates.
+The diagrams above describe the intended system, not a production deployment. A local Compose slice now includes the FastAPI API, PostgreSQL, migrations, static React frontend, and Caddy proxy. Typed NASA clients and public read routes are implemented, but durable workers, protected account/report APIs, AI, MCP, and production deployment remain incomplete. Review [project status](../../PROJECT_STATUS.md) and [implementation progress](../IMPLEMENTATION_PROGRESS.md) for evidence and remaining work.

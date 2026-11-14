@@ -1,11 +1,11 @@
 # Docker Architecture
 
-**Version:** 1.0  
-**Last updated:** 2026-11-13  
-**Status:** Phase 1 infrastructure baseline  
-**Purpose:** Make development and Ubuntu VPS deployment reproducible without host Python, Node, or PostgreSQL.  
-**Scope:** Covers the proposed Docker Architecture behavior and interfaces; current implementation status is tracked separately.  
-**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.  
+**Version:** 1.0<br>
+**Last updated:** 2026-11-14<br>
+**Status:** Local API/database/frontend/proxy slice implemented; production architecture remains a target<br>
+**Purpose:** Make development and Ubuntu VPS deployment reproducible without host Python, Node, or PostgreSQL.<br>
+**Scope:** Covers the proposed Docker Architecture behavior and interfaces; current implementation status is tracked separately.<br>
+**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.<br>
 
 
 ## Services
@@ -20,6 +20,10 @@
 | caddy | Official Caddy 2 image with Caddyfile and certificate-state volume. | Only service publishing host ports. |
 | migrate | One-shot backend image running Alembic to head before app startup. | Private data network; must exit successfully first. |
 
+### Current implementation
+
+`compose.yaml` currently runs PostgreSQL 18, Alembic migrations, the API, a separate ingestion worker, a static Nginx frontend, and Caddy on local port 8080. Database and proxy networks are isolated; only Caddy publishes a host port. The backend image runs as a non-root UID, and frontend/API/worker/Caddy use read-only root filesystems with writable temporary paths. Deterministic schedules are opt-in and disabled by default. MCP, production TLS/domain configuration, persistent Caddy certificate storage, image scanning, and resource limits are not implemented yet.
+
 ## Networks and volumes
 
 - proxy/edge: Caddy, frontend, API, MCP; only Caddy maps public ports.
@@ -30,7 +34,7 @@
 
 ## Health, hardening, resources
 
-PostgreSQL health uses pg_isready. API liveness is process-only; readiness checks DB/schema. Worker health reports heartbeat/lease. MCP readiness confirms startup only. Compose dependencies use service_healthy and service_completed_successfully. Run as non-root, drop capabilities, set no-new-privileges, use resource limits, rotate logs, scan images, and never bake secrets into layers.
+PostgreSQL health uses pg_isready. API liveness is process-only; readiness checks DB/schema. The worker renews PostgreSQL leases while processing, but has no separate health or queue-depth endpoint yet. Compose dependencies use service_healthy and service_completed_successfully. Run as non-root, drop capabilities, set no-new-privileges, use resource limits, rotate logs, scan images, and never bake secrets into layers.
 
 Initial VPS estimate: 2 vCPU, 4 GB RAM, 40 GB SSD for one portfolio deployment; validate with measured load and alert at 75% disk/80% memory. Media files are linked, not mirrored.
 

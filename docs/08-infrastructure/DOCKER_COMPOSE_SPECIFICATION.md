@@ -1,19 +1,20 @@
 # Docker Compose Specification
 
-**Version:** 1.0  
-**Last updated:** 2026-11-13  
-**Status:** Implementation-ready design; Compose files are planned for the Docker milestone.  
-**Purpose:** Specify the intended Docker Compose Specification requirements and implementation constraints.  
-**Scope:** Covers the proposed Docker Compose Specification behavior and interfaces; current implementation status is tracked separately.  
-**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.  
+**Version:** 1.0<br>
+**Last updated:** 2026-11-14<br>
+**Status:** The local Compose stack is implemented; production overlay and deployment controls remain open.<br>
+**Purpose:** Document local Compose services and identify production infrastructure gaps.<br>
+**Scope:** Covers `compose.yaml` as shipped for local development. Production TLS, secrets mounts, backups, and resource controls are not implemented here.<br>
+**Assumptions:** Docker Engine/Desktop and the Compose plugin are available. Recheck upstream image tags and API contracts during deployment preparation.<br>
 
 
 
 ## Files and workflows
 
-- compose.yaml is the development/default stack and supports docker compose up --build from a clean checkout.
-- compose.production.yaml overlays production ports, restart policies, secrets, resource limits, read-only filesystems, and Caddy domain configuration.
-- When a checked-in example template is present, it contains safe placeholders only. `.env`, local secret files, production certs, and data are ignored. The current working tree has `.env.example` deleted; reconcile this during the Compose implementation milestone if an example is needed.
+- compose.yaml is the local development stack and supports `docker compose up --build` when Docker Compose is available.
+- The current stack contains PostgreSQL, a one-shot migration task, API, ingestion worker, static frontend, private MCP service, and local Caddy proxy. It supports deterministic daily jobs when `WORKER_SCHEDULES_ENABLED=true`; this remains disabled by default.
+- There is no production overlay yet. Production domain/TLS configuration, resource limits, backup workflow, and file-backed Compose secret mounts remain release work.
+- `.env` and local secret files are ignored; `.env.example` contains placeholders only. Compose reads local environment values at runtime, and the Docker build context excludes `.env` files.
 - Backend, worker, and MCP use one immutable backend image with distinct commands.
 
 ## Base service dependencies
@@ -34,7 +35,7 @@ services:
         condition: service_completed_successfully
 ~~~
 
-This is a design excerpt, not a complete Compose file. At implementation, pin a currently supported patch/image digest and validate the merged configuration with docker compose config. The doubled dollar in the real Compose YAML defers variable expansion to the container shell.
+The current implementation follows this startup dependency order and validates its configuration with `docker compose config --quiet`. The doubled dollar in the PostgreSQL healthcheck defers variable expansion to the container shell.
 
 ## Production controls
 

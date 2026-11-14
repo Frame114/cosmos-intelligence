@@ -1,28 +1,31 @@
-"""Validated model for one item from NASA's APOD Basic feed."""
+"""Validated APOD Basic response fields used by the product API."""
 
 from datetime import date
 
-from pydantic import BaseModel, ConfigDict, HttpUrl
-
-from fastapi import APIRouter
-
-router = APIRouter(prefix="/nasa", tags=["nasa"])  # Create a router to hold the APOD model's endpoints.
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field
 
 
 class ApodRecord(BaseModel):
-    """Represent the APOD fields used by Cosmos Intelligence."""
-
-    # NASA may add fields; this model keeps the fields we use and ignores the rest.
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="allow", str_strip_whitespace=True)
 
     date: date
-    post_id: int
-    title: str
-    permalink: HttpUrl
-    media_type: str
-    explanation: str
+    post_id: int | None = None
+    title: str = Field(min_length=1, max_length=500)
+    permalink: AnyUrl | None = None
+    media_type: str = Field(min_length=1, max_length=40)
+    explanation: str = ""
     credit: str | None = None
     copyright: str | None = None
     alt: str | None = None
-    url: HttpUrl
-    hdurl: str | None = None
+    url: AnyUrl | None = None
+    hdurl: AnyUrl | None = None
+    basic_html: str | None = None
+    basic_html_url: AnyUrl | None = None
+
+    @property
+    def source_url(self) -> str:
+        return str(self.permalink or self.url or "https://apod.nasa.gov/")
+
+    @property
+    def media_url(self) -> str | None:
+        return str(self.hdurl or self.url) if (self.hdurl or self.url) else None

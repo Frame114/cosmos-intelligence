@@ -1,0 +1,20 @@
+{
+	admin off
+}
+
+:8080 {
+	encode zstd gzip
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+	}
+
+	@api path /api/* /health* /openapi.json /docs /docs/* /redoc
+	reverse_proxy @api api:8000
+
+	@mcp path /mcp* /.well-known/oauth-protected-resource*
+	reverse_proxy @mcp mcp:8000
+
+	reverse_proxy frontend:8080
+}

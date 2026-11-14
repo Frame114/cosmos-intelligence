@@ -1,11 +1,11 @@
 # CI/CD Specification
 
-**Version:** 1.0  
-**Last updated:** 2026-11-13  
-**Status:** Phase 1 design baseline; existing CI is an initial Python quality job  
-**Purpose:** Specify the intended CI/CD Specification requirements and implementation constraints.  
-**Scope:** Covers the proposed CI/CD Specification behavior and interfaces; current implementation status is tracked separately.  
-**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.  
+**Version:** 1.0<br>
+**Last updated:** 2026-11-14<br>
+**Status:** Design baseline with partial Python, PostgreSQL, and frontend workflow implemented<br>
+**Purpose:** Specify the intended CI/CD Specification requirements and implementation constraints.<br>
+**Scope:** Covers the proposed CI/CD Specification behavior and interfaces; current implementation status is tracked separately.<br>
+**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.<br>
 
 
 
@@ -19,7 +19,7 @@ NASA and OpenRouter tests use mocked fixtures with no real key. A separate manua
 
 Tag a version after checks and release checklist. Build immutable images, produce SBOM, scan, publish to a registry, and deploy through a protected GitHub environment with reviewer approval and masked production secrets. Deployment is never triggered from arbitrary PR code. Run backup → migration → rollout → smoke check and preserve previous image tags.
 
-The existing .github/workflows/ci.yml currently uses Python 3.11 lint and pytest. Implementation must update it; this documentation phase does not change the workflow.
+The current `.github/workflows/ci.yml` uses Python 3.12, Ruff, mypy, disposable PostgreSQL migration/drift checks, backend tests, and frontend install/type/test/build checks. The workflow has not been run on GitHub for this working tree. Reviewed action SHA pinning, dependency lock installation, OpenAPI diffing, MCP tests, Compose validation/build, and dependency/secret/image scanning remain open.
 
 ## Related documents
 

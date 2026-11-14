@@ -12,6 +12,7 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+*.tsbuildinfo
 .venv/
 venv/
 ENV/
@@ -33,6 +34,9 @@ Thumbs.db
 node_modules/
 dist/
 coverage/
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
 
 # Local data and runtime
 data/
@@ -40,6 +44,9 @@ data/
 *.db
 logs/
 *.log
+.tmp-cosmos-test/
 
 # Docker/local overrides
 docker-compose.override.yml
+compose.override.yaml
+.secrets/

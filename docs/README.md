@@ -2,13 +2,13 @@
 
 **Version:** 1.0  
 **Last updated:** 2026-11-13  
-**Status:** Phase 1 documentation baseline  
-**Purpose:** Navigate the Cosmos Intelligence engineering blueprint.  
-**Scope:** Navigation, recommended reading order, and organization of the Phase 1 engineering specification.  
-**Assumptions:** This index describes a design package and does not imply implementation or deployment.  
+**Status:** Engineering blueprint with a locally implemented application; status evidence is tracked separately.
+**Purpose:** Navigate the Cosmos Intelligence engineering documentation and current implementation evidence.
+**Scope:** Product and architecture design, implementation contracts, operations guides, and living project records.
+**Assumptions:** Detailed specifications include planned target-state requirements. Consult the project status and implementation progress records to distinguish plans, local implementation, verified behavior, and production deployment.
 
 
-This index is the entry point for the Cosmos Intelligence product and engineering specification. It describes the intended architecture and delivery plan; it does not claim that planned components have been implemented or deployed.
+This index is the entry point for the Cosmos Intelligence engineering documentation. The repository contains both a broad target-state blueprint and a working local development application. The living status records identify which components have implementation and verification evidence; documentation of a target does not by itself mean that target is implemented or deployed.
 
 ## Recommended reading order
 

@@ -1,8 +1,8 @@
 # System Architecture
 
-**Version:** 1.0  
-**Last updated:** 2026-11-13  
-**Status:** Phase 1 specification baseline  
+**Version:** 1.0<br>
+**Last updated:** 2026-11-14<br>
+**Status:** Target architecture; local API/database/worker/frontend slice is testable; MCP is locally implemented; production controls remain incomplete<br>
 **Purpose:** Define runtime boundaries and the dependency direction for implementation.  
 **Scope:** Covers the proposed System Architecture behavior and interfaces; current implementation status is tracked separately.  
 
@@ -10,6 +10,8 @@
 ## Design
 
 The system is a modular Python application with distinct API, worker, and MCP processes. All processes compose the same application services and repositories. The browser receives a built React SPA and uses the versioned FastAPI API. PostgreSQL is the authoritative local store for normalized records, provenance, jobs, and authenticated user data. NASA services are read-only upstream sources. OpenRouter is optional and called only by the AI provider adapter.
+
+The current local Compose stack implements PostgreSQL, Alembic migrations, the API, a separate ingestion worker, a static React frontend, and Caddy routing. The worker consumes bounded APOD, NeoWs, DONKI, and EONET jobs with PostgreSQL leases. Deterministic daily schedules exist but are disabled by default. Owner-scoped account/workspace APIs and admin job summaries exist; browser PKCE sign-in, provider-backed AI, production OIDC, NASA Media job inputs, and production deployment controls remain unimplemented. Do not interpret the target diagram as deployed infrastructure.
 
 ~~~mermaid
 flowchart LR

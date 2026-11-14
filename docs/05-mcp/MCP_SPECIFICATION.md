@@ -1,11 +1,11 @@
 # MCP Specification
 
-**Version:** 1.0  
-**Last updated:** 2026-11-13  
-**Status:** Phase 1 specification baseline  
-**Purpose:** Define a safe MCP adapter over shared Cosmos application services.  
-**Scope:** Covers the proposed MCP Specification behavior and interfaces; current implementation status is tracked separately.  
-**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.  
+**Version:** 1.0
+**Last updated:** 2026-11-13
+**Status:** Specification baseline; local authenticated Streamable HTTP implementation is smoke-tested; production identity and Inspector evidence remain
+**Purpose:** Define a safe MCP adapter over shared Cosmos application services.
+**Scope:** Covers the proposed MCP Specification behavior and interfaces; local implementation is available; production acceptance is tracked separately.
+**Assumptions:** Local implementation exists; verify mutable upstream contracts before release.
 
 
 ## SDK and transport

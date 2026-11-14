@@ -1,69 +1,125 @@
 # Cosmos Intelligence
 
-Cosmos Intelligence is a planned open-source platform for exploring NASA astronomy, near-Earth object, space-weather, Earth-event, and media data. The project combines a Python API, a web dashboard, a provenance-aware data layer, and optional evidence-grounded AI and Model Context Protocol (MCP) access.
+Cosmos Intelligence is an independent research dashboard and API for exploring NASA astronomy, near-Earth objects, space weather, Earth events, and NASA media. It combines source-backed public data with saved records and other user-workspace features. The current application is a local development build; it is not a production service and is not affiliated with NASA.
 
-**Current state:** architecture and documentation baseline. The repository also contains an early FastAPI foundation and APOD prototype. A complete Docker-first full-stack application has not yet been implemented or verified. See [project status](PROJECT_STATUS.md) for the evidence-based breakdown.
+**Version:** 0.1.0 (pre-release local build)
 
-## Start here
+## Current status
+
+The Docker Compose application is available for local hands-on testing. Implemented flows include astronomy/APOD browsing, asteroid search and comparison with JPL Horizons trajectory sampling, DONKI space-weather events, EONET Earth events with interactive mapping and related coverage, NASA media search/details, saved records, settings, reports, and an authenticated MCP endpoint. AI-generated answers/reports are deliberately disabled pending policy review and implementation. Production OIDC browser sign-in, operations hardening, and deployment are not complete.
+
+See [project status](PROJECT_STATUS.md), [implementation progress and verification evidence](docs/IMPLEMENTATION_PROGRESS.md), [roadmap](ROADMAP.md), and [technical debt](TECHNICAL_DEBT.md).
+
+## Capabilities
+
+- Browse APOD Basic, NeoWs near-Earth objects, DONKI space-weather notifications, EONET events, and NASA Image and Video Library records.
+- View provenance and upstream source links, and save selected records to a user workspace.
+- Compare asteroid records and visualize close approaches plus sampled JPL Horizons trajectories. Orbital displays are projections and preserve source units; they are not impact forecasts.
+- View EONET event locations, category imagery overlays, NASA media matches, and related news search results.
+- Use a responsive React dashboard backed by a versioned FastAPI API.
+- Persist source records and user workspace data in PostgreSQL, with Alembic migrations and an opt-in ingestion worker.
+- Connect an authenticated Model Context Protocol (MCP) service that delegates to the application API.
+
+## Technology and architecture
+
+| Layer | Implementation |
+|---|---|
+| Frontend | React, TypeScript, Vite, Leaflet, Three.js, Recharts |
+| API and clients | Python 3.12, FastAPI, Pydantic, HTTPX |
+| Persistence | PostgreSQL, SQLAlchemy async, Alembic |
+| Background work | Separate Python worker with PostgreSQL-backed jobs and leases |
+| MCP | Official Python MCP SDK over Streamable HTTP |
+| Local operations | Docker Compose, Nginx, Caddy |
+| Quality | pytest, Ruff, mypy, Vitest, TypeScript, GitHub Actions |
+
+```text
+app/                 API, NASA/JPL clients, persistence, auth, MCP, worker
+alembic/             Database migration configuration and revisions
+frontend/             React dashboard and frontend checks
+tests/               Backend unit, contract, and optional PostgreSQL tests
+docs/                Product, architecture, integration, operations, and QA docs
+compose.yaml         Local API, database, migrations, worker, frontend, and proxy
+```
+
+The API, MCP service, and worker use the same backend image with separate commands. Caddy routes the local dashboard/API/MCP on port 8080. PostgreSQL has no published host port in the default Compose configuration.
+
+## Prerequisites
+
+- Docker Engine/Desktop with the Docker Compose plugin.
+- For checks outside Docker: Python 3.12 and Node.js 22.22.2 with npm 11.6.2.
+- A NASA API key is optional for local use. Without one, the stack uses NASA's `DEMO_KEY`, which has stricter rate limits.
+
+## Run locally with Docker Compose
+
+```sh
+docker compose up --build -d
+docker compose ps
+```
+
+Open <http://localhost:8080>. The API schema is at <http://localhost:8080/api/v1/openapi.json>. Stop containers with `docker compose down`; this preserves the named PostgreSQL volume. Use `docker compose down -v` only when you intentionally want to remove local database data.
+
+Optional local configuration:
+
+1. Copy `.env.example` to `.env`.
+2. Put a private NASA key in `.env` as `NASA_API_KEY=...` if you have one. `.env` is ignored and excluded from Docker build contexts. Never paste real credentials into source files, shell history, issue reports, or logs.
+3. Start or rebuild with `docker compose up --build -d`.
+
+Compose enables a development-only identity by default for local workspace testing. It is not a sign-in system and must not be used for a public deployment. Worker schedules are disabled by default; set `WORKER_SCHEDULES_ENABLED=true` in the local environment only when you want the worker to enqueue daily data windows.
+
+## Run checks
+
+Install the backend and development tools:
+
+```sh
+python -m pip install -e ".[dev]"
+```
+
+Run fast backend tests, lint, and type checking:
+
+```sh
+ruff check .
+mypy app
+python -m pytest -q
+```
+
+PostgreSQL-backed integration tests are skipped unless `COSMOS_TEST_DATABASE_URL` points to a disposable test database. Apply migrations to that database before running those tests. Never point test commands at the persistent local or production database. Coverage is available with `python -m pytest --cov=app --cov-report=term-missing` after installing the declared development dependencies.
+
+Run frontend checks:
+
+```sh
+cd frontend
+npm ci
+npm run check
+npm test -- --run
+npm run build
+```
+
+The GitHub Actions workflow runs Python lint/type/tests and migration checks against a disposable PostgreSQL service, plus frontend typecheck/tests/build.
+
+## Integrations and external services
+
+- NASA APOD Basic, NeoWs, DONKI, EONET v3, and NASA Image and Video Library.
+- JPL Small-Body Database and Horizons for asteroid details and trajectory samples.
+- GDELT DOC API for related news links; NASA GIBS imagery layers for supported Earth-event categories.
+- OpenStreetMap tiles for the event map, with on-map attribution. Review tile-provider usage terms before public deployment.
+- Docker Hub images for PostgreSQL and Caddy during Compose startup/build.
+
+Upstream APIs and tile/news services can be unavailable, rate-limited, or return no matches. Related news and library images are labeled as unverified matches, not confirmed evidence for an individual event. NASA asset credit and rights remain item-specific. See [NASA integrations](docs/03-integrations/NASA_INTEGRATIONS.md) and [provenance](docs/03-integrations/API_PROVENANCE.md).
+
+## Configuration and security
+
+`.env.example` documents local Compose settings with nonsecret placeholders. `.env`, `.env.*`, `.secrets/`, key files, local data, caches, and build outputs are ignored. NASA and database credentials are read at runtime; the frontend does not receive the NASA key. The API supports secret-file settings for direct runtime configuration, but production Compose secret mounts and deployment configuration are still open work. See [environment configuration](docs/08-infrastructure/ENVIRONMENT_CONFIGURATION.md) and [secrets management](docs/06-security/SECRETS_MANAGEMENT.md).
+
+## Documentation
 
 - [Documentation index](docs/README.md)
-- [Product requirements](docs/00-project/PRD.md)
-- [System architecture](docs/01-architecture/SYSTEM_ARCHITECTURE.md)
-- [NASA integration research](docs/03-integrations/NASA_INTEGRATIONS.md)
-- [Implementation plan](docs/10-implementation/IMPLEMENTATION_PLAN.md)
-- [Roadmap](ROADMAP.md)
+- [Architecture](docs/01-architecture/SYSTEM_ARCHITECTURE.md)
+- [API specification](docs/02-technical/API_SPECIFICATION.md)
+- [Local development](docs/11-operations/LOCAL_DEVELOPMENT.md)
+- [Testing strategy](docs/09-quality-assurance/TESTING_STRATEGY.md)
+- [Implementation progress](docs/IMPLEMENTATION_PROGRESS.md)
+- [Contributing](CONTRIBUTING.md)
 
-## Product direction
+## License
 
-The planned application will:
-
-- Integrate selected NASA data services with explicit validation, source provenance, and attribution.
-- Support searching, comparing, and visualizing astronomy, near-Earth objects, space weather, natural events, and NASA media.
-- Present media links with item-level rights metadata; the application will not mirror NASA media binaries by default.
-- Add an optional research assistant whose answers reference validated source records and disclose uncertainty.
-- Expose selected application capabilities through typed MCP tools and resources.
-- Run reproducibly in Docker Compose for local development and deploy behind HTTPS on an Ubuntu VPS.
-
-These are planned capabilities, not a claim that the features already exist. See [product scope](docs/00-project/PRODUCT_SCOPE.md) for explicit inclusions and exclusions.
-
-## Target architecture
-
-| Area | Documented direction |
-|---|---|
-| Backend | Python, FastAPI, Pydantic, HTTPX, SQLAlchemy, Alembic |
-| Database | PostgreSQL |
-| Frontend | React, TypeScript, Vite, Tailwind CSS |
-| Charts and maps | Recharts; map provider remains a deployment decision |
-| AI | Optional provider abstraction; public generation remains gated on policy review |
-| Interoperability | Official Python MCP SDK, with transport and authorization boundaries |
-| Operations | Docker Compose, GitHub Actions, Caddy for HTTPS |
-
-The target and rationale are in [technology stack](docs/02-technical/TECH_STACK.md); [Docker architecture](docs/08-infrastructure/DOCKER_ARCHITECTURE.md) is a specification, not an available compose deployment yet.
-
-## NASA integrations and research freshness
-
-The current research baseline selects APOD Basic, NeoWs, DONKI, EONET v3, and NASA's Image and Video Library. Endpoint behavior can change; each integration must be rechecked against its linked official documentation and a fresh response before implementation. NASA's published APOD migration retires the legacy APOD API on 2026-12-01; implementation should use the replacement service and verify the dedicated date-filter contract.
-
-NASA-branded or NASA-derived content is not an endorsement. Asset-level copyright/credit may vary, and NASA's current AI/SI language needs formal review before the project enables generated responses based on NASA data. See [NASA attribution and provenance](docs/03-integrations/API_PROVENANCE.md) and the integration-specific policy gate.
-
-Official starting points: [NASA API portal](https://api.nasa.gov/), [APOD Basic](https://science.nasa.gov/wp-json/wp/v2/apod-basic), [NeoWs](https://api.nasa.gov/), [EONET v3](https://eonet.gsfc.nasa.gov/api/v3), [NASA Image and Video Library](https://images-api.nasa.gov/).
-
-## Development
-
-The current executable repository is an early Python backend prototype, not the full-stack target. For the existing environment and commands, consult [local development](docs/11-operations/LOCAL_DEVELOPMENT.md), then check that guide against the current repository before relying on any command. It describes intended setup steps and does not assert a successful build, test run, or Docker startup.
-
-Do not place real NASA or LLM credentials in source control, logs, example fixtures, or URLs. The architecture provides secret-handling rules in [secrets management](docs/06-security/SECRETS_MANAGEMENT.md).
-
-## Project records
-
-- [Project status](PROJECT_STATUS.md)
-- [Engineering roadmap](ROADMAP.md)
-- [Architecture decision log](DECISIONS.md)
-- [Technical debt register](TECHNICAL_DEBT.md)
-- [Engineering assessment](ASSESSMENT.md)
-- [Changelog](CHANGELOG.md)
-- [Definition of done](DEFINITION_OF_DONE.md)
-
-## Licensing and disclaimer
-
-Repository source code is licensed under MIT (see [LICENSE](LICENSE)). NASA datasets and media remain subject to their own terms, attribution rules, and item-specific rights. Cosmos Intelligence is an independent educational and research project, not an official NASA product. Its content is not authoritative operational, safety, or scientific advice.
+The repository code is available under the [MIT License](LICENSE). NASA datasets/media may have separate attribution and usage terms. Cosmos Intelligence is an independent research project and does not represent NASA.

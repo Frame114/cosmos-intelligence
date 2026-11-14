@@ -1,21 +1,25 @@
 # Environment Configuration
 
-**Version:** 1.0  
-**Last updated:** 2026-11-13  
-**Status:** Phase 1 configuration contract  
-**Purpose:** Specify the intended Environment Configuration requirements and implementation constraints.  
-**Scope:** Covers the proposed Environment Configuration behavior and interfaces; current implementation status is tracked separately.  
-**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.  
+**Version:** 1.0<br>
+**Last updated:** 2026-11-14<br>
+**Status:** Runtime settings implemented; production secret wiring remains open<br>
+**Purpose:** Specify the intended Environment Configuration requirements and implementation constraints.<br>
+**Scope:** Covers the proposed Environment Configuration behavior and interfaces; current implementation status is tracked separately.<br>
+**Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.<br>
 
 
 
 ## Nonsecret settings
 
-APP_ENV, APP_NAME, LOG_LEVEL, PUBLIC_BASE_URL, CORS_ALLOWED_ORIGINS (development only), NASA_API_TIMEOUT_SECONDS, NASA_MAX_CONCURRENCY, DATABASE_HOST/PORT/NAME/USER, DB_POOL_SIZE, OIDC_ISSUER_URL, OIDC_AUDIENCE, OIDC_CLIENT_ID, OPENROUTER_MODEL, OPENROUTER_ENABLED, AI_MAX_OUTPUT_TOKENS, rate limits, cache TTLs, and retention periods.
+APP_ENV, APP_NAME, LOG_LEVEL, PUBLIC_BASE_URL, CORS_ALLOWED_ORIGINS (development only), NASA_API_TIMEOUT_SECONDS, NASA_MAX_CONCURRENCY, DATABASE_HOST/PORT/NAME/USER, DB_POOL_SIZE, WORKER_POLL_INTERVAL_SECONDS, WORKER_LEASE_SECONDS, OIDC_ISSUER_URL, OIDC_AUDIENCE, OIDC_CLIENT_ID, OPENROUTER_MODEL, OPENROUTER_ENABLED, AI_MAX_OUTPUT_TOKENS, rate limits, cache TTLs, and retention periods.
 
 ## Secret file settings
 
 NASA_API_KEY_FILE, OPENROUTER_API_KEY_FILE, DATABASE_PASSWORD_FILE, POSTGRES_PASSWORD_FILE, OIDC_CLIENT_SECRET_FILE when applicable, and BACKUP_ENCRYPTION_KEY_FILE. Application settings load file contents into SecretStr and must not echo them during validation.
+
+The application currently reads `NASA_API_KEY_FILE`, `OPENROUTER_API_KEY_FILE`, and `DATABASE_URL_FILE` at runtime. Local Compose defaults to `DEMO_KEY` and can pass a locally configured `NASA_API_KEY` to the API and ingestion worker processes. Production Compose secret mounts are not yet implemented.
+
+The worker polls every two seconds by default and holds a five-minute lease. Daily APOD, NeoWs, DONKI notification, and EONET windows are generated only when `WORKER_SCHEDULES_ENABLED=true`; the default is false to avoid upstream calls on a fresh local startup.
 
 ## Environment rules
 

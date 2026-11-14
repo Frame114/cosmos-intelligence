@@ -1,47 +1,70 @@
-# Describe this module's purpose.
-"""HTTP client for NASA's Astronomy Picture of the Day (APOD) feed."""  
+"""APOD Basic client using NASA's current replacement feed."""
 
-# Import HTTPX, the library used to send asynchronous web requests.
-import httpx
+from datetime import date
 
-# Import the model that validates one APOD record.
+from pydantic import ValidationError
+
+from app.clients.nasa_base import NASAClient
+from app.core.errors import UpstreamError
 from app.models.apod import ApodRecord
 
-# Keep the official APOD Basic endpoint URL in one reusable constant.
-APOD_ENDPOINT = "https://science.nasa.gov/wp-json/wp/v2/apod-basic"
 
-
-# Define a class to keep NASA APOD request logic together.
 class NasaApodClient:
-    """Fetch and validate records from NASA's APOD Basic endpoint."""  # Document this class.
+    def __init__(self, transport: NASAClient, base_url: str) -> None:
+        self.transport = transport
+        self.base_url = base_url.rstrip("/")
 
-    # Accept an HTTP client created and managed by the application.
-    def __init__(self, http_client: httpx.AsyncClient) -> None:
-        # Remember the shared client so methods in this class can use it.
-        self._http_client = http_client  # Store the supplied HTTP client.
-
-    # Define an async method because a network request must wait for NASA.
     async def get_latest(self) -> ApodRecord:
-        """Fetch the newest APOD record and validate its fields."""  # Document this method.
+        records = await self.search(page=1, page_size=1)
+        if not records:
+            raise UpstreamError(
+                "APOD", "upstream_empty", "NASA APOD returned no records.", retryable=False
+            )
+        return records[0]
 
-        # Send a GET request and wait for NASA's HTTP response.
-        response = await self._http_client.get(  # Await the asynchronous request.
-            APOD_ENDPOINT,  # Use the NASA APOD Basic endpoint.
-            params={"page": 1, "per_page": 1},  # Request one item from the first page.
-        )  # Finish the request and assign its response above.
+    async def get_by_date(self, apod_date: date) -> ApodRecord | None:
+        date_code = apod_date.strftime("%y%m%d")
+        payload, _, _ = await self.transport.get_json("APOD", f"{self.base_url}/{date_code}")
+        if not isinstance(payload, dict):
+            raise UpstreamError(
+                "APOD",
+                "upstream_schema_error",
+                "NASA APOD returned an unexpected record.",
+                retryable=False,
+            )
+        return ApodRecord.model_validate(payload)
 
-        # Convert non-success HTTP status codes into exceptions.
-        response.raise_for_status()  # Stop here if NASA returned an HTTP error.
-
-        # Decode the response body from JSON into Python data.
-        payload = response.json()  # The endpoint returns a list of APOD records.
-
-        # Check that the response is a non-empty list before indexing into it.
-        if not isinstance(payload, list) or not payload:  # Reject the wrong shape or no records.
-            # Explain why the response cannot be used as an APOD record.
-            # Report invalid data.
-            raise ValueError("NASA APOD returned an empty or unexpected response.")  
-            
-            
-        # Select the first list item and validate its fields with Pydantic.
-        return ApodRecord.model_validate(payload[0])  # Return one validated APOD record.
+    async def search(
+        self,
+        *,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> list[ApodRecord]:
+        if page < 1 or page_size < 1 or page_size > 25:
+            raise ValueError("APOD page must be positive and page_size must be between 1 and 25.")
+        if start_date and end_date and start_date > end_date:
+            raise ValueError("start_date must be on or before end_date.")
+        params: dict[str, int | str] = {"page": page, "per_page": page_size}
+        if start_date:
+            params["date_from"] = start_date.strftime("%y%m%d")
+        if end_date:
+            params["date_to"] = end_date.strftime("%y%m%d")
+        payload, _, _ = await self.transport.get_json("APOD", self.base_url, params=params)
+        if not isinstance(payload, list):
+            raise UpstreamError(
+                "APOD",
+                "upstream_schema_error",
+                "NASA APOD returned an unexpected list.",
+                retryable=False,
+            )
+        try:
+            return [ApodRecord.model_validate(item) for item in payload]
+        except ValidationError as error:
+            raise UpstreamError(
+                "APOD",
+                "upstream_schema_error",
+                "NASA APOD returned a malformed record.",
+                retryable=False,
+            ) from error

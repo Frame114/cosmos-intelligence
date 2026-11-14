@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Last updated:** 2026-11-13  
-**Status:** Phase 1 specification baseline  
+**Status:** Design baseline; compare and workspace routes are implemented locally, while assistant generation remains gated
 **Purpose:** Define the stable REST contract; OpenAPI generated from implementation is the machine-readable source.  
 **Scope:** Covers the proposed Internal REST API Specification behavior and interfaces; current implementation status is tracked separately.  
 **Assumptions:** This is a design baseline; verify repository state and mutable upstream contracts before implementation.  
@@ -33,11 +33,13 @@
 | GET /api/v1/earth-events/{event_id} | Public read | Event detail and available geometry/source references. |
 | GET /api/v1/media | Public read | q, media_type, year_start/end, page/page_size. |
 | GET /api/v1/media/{nasa_id} | Public read | Stored media metadata and source asset links. |
-| POST /api/v1/research/conversations | Authenticated | Create conversation and first question; rate-limited. |
-| POST /api/v1/research/conversations/{id}/messages | Owner | Submit one question and receive validated answer/evidence. |
+| GET /api/v1/auth/session | Optional identity | Report safe local/OIDC configuration state. |
+| GET /api/v1/auth/me | Authenticated | Upsert and return the current account. |
+| POST /api/v1/research/conversations | Authenticated | Create an empty conversation. |
+| POST /api/v1/research/conversations/{id}/messages | Owner | Currently returns a safe 503 while policy/retrieval/provider requirements are unmet; no prompt is sent or stored. |
 | GET /api/v1/research/conversations/{id} | Owner | Read conversation. |
 | DELETE /api/v1/research/conversations/{id} | Owner | Delete conversation and dependent generated content. |
-| POST /api/v1/reports | Authenticated | Generate structured report from query/evidence; rate/cost limited. |
+| POST /api/v1/reports | Authenticated | Currently returns a safe 503; provider-backed generation is not implemented and the NASA policy gate is closed. |
 | GET /api/v1/reports | Owner | List reports, paginated. |
 | GET /api/v1/reports/{id} | Owner | Read report with evidence snapshot. |
 | DELETE /api/v1/reports/{id} | Owner | Delete report. |

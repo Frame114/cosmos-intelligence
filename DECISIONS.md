@@ -7,13 +7,13 @@ This is the concise project-level record. Detailed architecture decisions and im
 - **Status:** Accepted as architecture direction.
 - **Decision:** Use a typed Python backend with FastAPI, Pydantic, HTTPX, SQLAlchemy, and Alembic.
 - **Reason:** The stack supports asynchronous HTTP integration, explicit validation, API schema generation, and the project's data/AI objectives.
-- **Open action:** Align the Python 3.12 target with the repository's current 3.11 metadata and CI before implementation.
+- **Implementation:** Package metadata, CI, and the backend image use Python 3.12; strict mypy checks pass locally.
 
 ## DEC-002 — Docker-first full application
 
-- **Status:** Accepted target; not implemented.
+- **Status:** Accepted target; local development slice implemented, remaining services/deployment open.
 - **Decision:** Use Docker Compose for reproducible local operation and the planned multi-service application.
-- **Reason:** The desired backend, worker, database, frontend, and optional MCP services should run consistently without a host-level Python/Node/PostgreSQL setup.
+- **Reason:** The backend, database, frontend, and proxy should run consistently without host-level Python/Node/PostgreSQL. Worker and MCP services remain future work.
 - **Reference:** [Docker architecture](docs/08-infrastructure/DOCKER_ARCHITECTURE.md).
 
 ## DEC-003 — Verify upstream contracts before implementation
